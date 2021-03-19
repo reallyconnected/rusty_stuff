@@ -42,6 +42,16 @@ fn handle_key(rl: &mut RaylibHandle, all_stars: &mut stars3d::AllStars3d) {
     if rl.is_key_down(KEY_LEFT_ALT) && rl.is_key_pressed(KEY_ENTER) {
         rl.toggle_fullscreen();
     }
+
+    if rl.is_key_pressed(KEY_RIGHT_BRACKET){
+        all_stars.increase_focal_length();
+    }
+
+    if rl.is_key_pressed(KEY_LEFT_BRACKET){
+        all_stars.decrease_focal_length();
+    }
+
+
 }
 
 fn main() {
@@ -72,9 +82,11 @@ fn main() {
         let mut d = rl.begin_drawing(&thread);
         let fps = d.get_fps();
         let fps_string = format!(
-            "Star Count: {} FPS: {}",
+            "Star Count: {}\nFocal Len: {}\nFPS: {}",
             all_stars.get_number_of_stars(),
-            fps
+            all_stars.get_focal_length(),
+            fps,
+
         );
 
         all_stars.set_window_size(d.get_screen_width(), d.get_screen_height());
