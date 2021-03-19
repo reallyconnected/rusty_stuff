@@ -8,7 +8,7 @@ use rand::Rng;
 use raylib::prelude::*;
 use std::fmt;
 
-enum DrawType {
+pub enum DrawType {
     Pixel,
     Rectangle,
     Circle,
@@ -104,6 +104,10 @@ impl AllStars3d {
             centre_y: ((window_height as f32 / 2.0) as f32).trunc() as i32,
             draw_type: DrawType::Rectangle,
         }
+    }
+
+    pub fn set_draw_type(&mut self, draw_type: DrawType) -> () {
+        self.draw_type = draw_type;
     }
 
     /// Populates a vector with a collection of AStar objects

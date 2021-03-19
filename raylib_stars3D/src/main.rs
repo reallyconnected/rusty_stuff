@@ -1,18 +1,36 @@
 // use this URL: https://www.raylib.com/cheatsheet/cheatsheet.html
 use raylib::prelude::*;
+use raylib::consts::KeyboardKey::*;
 mod stars3d;
 
-const TARGE_FPS: u32 = 60;
+const TARGET_FPS: u32 = 60;
 const FULL_SCREEN: bool = false;
 
 const WINDOW_WIDTH: i32 = 3840;
 const WINDOW_HEIGHT: i32 = 2160;
 const WINDOW_FACTOR: i32 = 3;
 
-enum DrawType {
-    Pixel,
-    Rectangle,
-    Circle,
+fn handle_key(rl: &mut RaylibHandle, all_stars: &mut stars3d::AllStars3d)
+{
+    if rl.is_key_pressed(KEY_P)
+    {
+        all_stars.set_draw_type(stars3d::DrawType::Pixel);
+    }
+
+    if rl.is_key_pressed(KEY_C)
+    {
+        all_stars.set_draw_type(stars3d::DrawType::Circle);
+    }
+
+    if rl.is_key_pressed(KEY_R)
+    {
+        all_stars.set_draw_type(stars3d::DrawType::Rectangle);
+    }
+
+    if rl.is_key_down(KEY_LEFT_ALT) && rl.is_key_pressed(KEY_ENTER) {
+        rl.toggle_fullscreen();
+    }
+
 }
 
 fn main() {
@@ -33,19 +51,21 @@ fn main() {
     }
     let (mut rl, thread) = init_function.build();
 
-    rl.set_target_fps(TARGE_FPS);
+    rl.set_target_fps(TARGET_FPS);
 
     while !rl.window_should_close() {
         all_stars.move_stars();
 
+        handle_key(&mut rl, &mut all_stars);
+
         let mut d = rl.begin_drawing(&thread);
         let fps = d.get_fps();
-        let out_string = format!("FPS: {}", fps);
+        let fps_string = format!("FPS: {}", fps);
 
         all_stars.set_window_size(d.get_screen_width(), d.get_screen_height());
 
         d.clear_background(Color::BLACK);
-        d.draw_text(&out_string, 12, 12, 20, Color::WHITE);
+        d.draw_text(&fps_string, 12, 12, 20, Color::WHITE);
 
         all_stars.plot_stars(&mut d);
     }
