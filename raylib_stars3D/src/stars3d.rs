@@ -25,6 +25,8 @@ pub struct AStar {
     y: f32,
     z: f32,
     speed: f32,
+    colour: Color,
+    layer: i32,
 }
 impl fmt::Debug for AStar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -48,18 +50,21 @@ impl AStar {
         let half_width = (window_width as f32 / 2.0).trunc() as i32;
         let half_height = (window_height as f32 / 2.0).trunc() as i32;
 
+        let (colour, layer) = AStar::get_colour_and_layer_from_speed(local_speed as f32);
         AStar {
             x: (rng.gen_range(0..window_width) - half_width) as f32,
             y: (rng.gen_range(0..window_height) - half_height) as f32,
             z: (rng.gen_range(0..MAX_Z_DISTANCE as i32)) as f32,
             speed: (signed_speed) as f32,
+            colour: colour,
+            layer: layer,
         }
     }
 
+
     /// Takes the current speed of the star and works out the colour it should be
     /// and also the "speed" layer that it is in.
-    fn get_colour_and_layer_from_speed(&self) -> (Color, i32) {
-        let speed_to_test = self.speed.abs() as f32;
+    fn  get_colour_and_layer_from_speed(speed_to_test: f32) -> (Color, i32) {
 
         let speed_values_in_range = (MAX_SPEED - MIN_SPEED) as f32 / SPEED_LAYERS;
 
@@ -78,6 +83,11 @@ impl AStar {
             ),
             speed_layer as i32,
         )
+    }
+
+    fn get_colour_and_layer(&self) -> (Color, i32)
+    {
+        (self.colour, self.layer)
     }
 }
 
@@ -173,7 +183,7 @@ impl AllStars3d {
     /// Plot stars in the vector.
     pub fn plot_stars(&mut self, draw_object: &mut RaylibDrawHandle) -> () {
         for a_star in &self.the_stars {
-            let (the_colour, layer) = a_star.get_colour_and_layer_from_speed();
+            let (the_colour, layer) = a_star.get_colour_and_layer();
             let plot_x = (((a_star.x / a_star.z ) * 256.0) + self.centre_x as f32)
                 .trunc() as i32;
             let plot_y = (((a_star.y / a_star.z ) * 256.0) + self.centre_y as f32)
