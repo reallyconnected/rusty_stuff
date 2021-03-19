@@ -4,16 +4,24 @@
 // TODO: Fix start up condition for 3d stars in the centre of the screen
 // TODO: Fix stars colour based on Z value. More grey, further away
 // TODO: Move base x,y,z to F32 and only convert to integer for output.
-
 use rand::Rng;
 use raylib::prelude::*;
 use std::fmt;
 
+enum DrawType {
+    Pixel,
+    Rectangle,
+    Circle,
+}
+
 static MIN_SPEED: u32 = 1;
-static MAX_SPEED: u32 = 4;
-static MAX_Z_DISTANCE: i32 = 1000;
+static MAX_SPEED: u32 = 3;
+static MAX_Z_DISTANCE: i32 = 512;
+static TOO_CLOSE_Z_DISTANCE: i32 = 16;
 static SPEED_LAYERS: f32 = 4.0;
 const NUMBER_OF_STARS: usize = 5000;
+
+
 
 /// Structure to store star information.
 pub struct AStar {
@@ -83,6 +91,7 @@ pub struct AllStars3d {
     window_height: i32,
     centre_x: i32,
     centre_y: i32,
+    draw_type: DrawType,
 }
 
 impl AllStars3d {
@@ -93,6 +102,7 @@ impl AllStars3d {
             the_stars: Vec::new(),
             centre_x: ((window_width as f32 / 2.0) as f32).trunc() as i32,
             centre_y: ((window_height as f32 / 2.0) as f32).trunc() as i32,
+            draw_type: DrawType::Rectangle,
         }
     }
 
@@ -113,8 +123,8 @@ impl AllStars3d {
         while star_index < NUMBER_OF_STARS {
             let mut new_z: i32 =
                 self.the_stars[star_index].z as i32 + self.the_stars[star_index].speed;
-            if new_z < 1 {
-                new_z = MAX_Z_DISTANCE;
+            if new_z < TOO_CLOSE_Z_DISTANCE {
+                new_z = rng.gen_range(0..MAX_Z_DISTANCE);
                 self.the_stars[star_index].y = rng.gen_range(0..self.window_height) - self.centre_y;
                 self.the_stars[star_index].x = rng.gen_range(0..self.window_width) - self.centre_x;
                 self.the_stars[star_index].speed =
@@ -129,17 +139,22 @@ impl AllStars3d {
     pub fn plot_stars(&mut self, draw_object: &mut RaylibDrawHandle) -> () {
         for a_star in &self.the_stars {
             let (the_colour, layer) = a_star.get_colour_and_layer_from_speed();
-            draw_object.draw_pixel(
-                (((a_star.x as f32 / a_star.z as f32) * 2.0) + self.centre_x as f32).trunc() as i32,
-                (((a_star.y as f32 / a_star.z as f32) * 2.0) + self.centre_y as f32).trunc() as i32,
-                the_colour,
-            );
-            // draw_object.draw_circle(
-            //     ((((a_star.x as f32 / a_star.z as f32) *2.0) + self.centre_x as f32)).trunc() as i32,
-            //     ((((a_star.y as f32 / a_star.z as f32) *2.0)+ self.centre_y as f32)).trunc() as i32,
-            //     (layer + 1) as f32,
-            //     the_colour,
-            // );
+            let plot_x = (((a_star.x as f32 / a_star.z as f32) * 256.0) + self.centre_x as f32)
+                .trunc() as i32;
+            let plot_y = (((a_star.y as f32 / a_star.z as f32) * 256.0) + self.centre_y as f32)
+                .trunc() as i32;
+
+            match self.draw_type
+            {
+                DrawType::Circle =>
+                    draw_object.draw_circle(plot_x, plot_y, (layer + 1) as f32, the_colour),
+
+                DrawType::Pixel =>
+                    draw_object.draw_pixel(plot_x, plot_y, the_colour),
+
+                DrawType::Rectangle =>
+                    draw_object.draw_rectangle(plot_x, plot_y, layer + 1, layer + 1, the_colour),
+            }
         }
     }
 
