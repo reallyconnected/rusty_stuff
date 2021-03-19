@@ -1,6 +1,10 @@
 // TODO: Update the code to be more idiomatic as per the nice folks at Reddit.
 // https://www.reddit.com/r/rust/comments/m79rvv/can_i_borrow_some_of_your_time_please/?utm_source=share&utm_medium=web2x&context=3
 
+// TODO: Fix start up condition for 3d stars in the centre of the screen
+// TODO: Fix stars colour based on Z value. More grey, further away
+// TODO: Move base x,y,z to F32 and only convert to integer for output.
+
 use rand::Rng;
 use raylib::prelude::*;
 use std::fmt;
