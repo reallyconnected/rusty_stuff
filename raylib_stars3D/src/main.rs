@@ -1,6 +1,6 @@
 // use this URL: https://www.raylib.com/cheatsheet/cheatsheet.html
-use raylib::prelude::*;
 use raylib::consts::KeyboardKey::*;
+use raylib::prelude::*;
 mod stars3d;
 
 const TARGET_FPS: u32 = 60;
@@ -10,40 +10,38 @@ const WINDOW_WIDTH: i32 = 3840;
 const WINDOW_HEIGHT: i32 = 2160;
 const WINDOW_FACTOR: i32 = 3;
 
-fn handle_key(rl: &mut RaylibHandle, all_stars: &mut stars3d::AllStars3d)
-{
-    if rl.is_key_pressed(KEY_P)
-    {
+fn handle_key(rl: &mut RaylibHandle, all_stars: &mut stars3d::AllStars3d) {
+    if rl.is_key_pressed(KEY_P) {
         all_stars.set_draw_type(stars3d::DrawType::Pixel);
     }
 
-    if rl.is_key_pressed(KEY_C)
-    {
+    if rl.is_key_pressed(KEY_C) {
         all_stars.set_draw_type(stars3d::DrawType::Circle);
     }
 
-    if rl.is_key_pressed(KEY_R)
-    {
+    if rl.is_key_pressed(KEY_R) {
         all_stars.set_draw_type(stars3d::DrawType::Rectangle);
     }
 
-    if rl.is_key_pressed(KEY_PAGE_UP)
-    {
+    if rl.is_key_down(KEY_LEFT_ALT) && rl.is_key_pressed(KEY_PAGE_UP) {
+        all_stars.adjust_star_number(500);
+    }
+
+    if rl.is_key_pressed(KEY_PAGE_UP) {
         all_stars.adjust_star_number(100);
     }
 
-    if rl.is_key_pressed(KEY_PAGE_DOWN)
-    {
-        all_stars.adjust_star_number(-100);
+    if rl.is_key_down(KEY_LEFT_ALT) && rl.is_key_pressed(KEY_PAGE_DOWN) {
+        all_stars.adjust_star_number(-500);
     }
 
+    if rl.is_key_pressed(KEY_PAGE_DOWN) {
+        all_stars.adjust_star_number(-100);
+    }
 
     if rl.is_key_down(KEY_LEFT_ALT) && rl.is_key_pressed(KEY_ENTER) {
         rl.toggle_fullscreen();
     }
-
-
-
 }
 
 fn main() {
@@ -73,13 +71,16 @@ fn main() {
 
         let mut d = rl.begin_drawing(&thread);
         let fps = d.get_fps();
-        let fps_string = format!("FPS: {}", fps);
+        let fps_string = format!(
+            "Star Count: {} FPS: {}",
+            all_stars.get_number_of_stars(),
+            fps
+        );
 
         all_stars.set_window_size(d.get_screen_width(), d.get_screen_height());
 
         d.clear_background(Color::BLACK);
-        d.draw_text(&fps_string, 12, 12, 20, Color::WHITE);
-
         all_stars.plot_stars(&mut d);
+        d.draw_text(&fps_string, 12, 12, 20, Color::WHITE);
     }
 }

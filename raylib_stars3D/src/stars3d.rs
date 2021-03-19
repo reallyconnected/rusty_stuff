@@ -1,9 +1,7 @@
 // TODO: Update the code to be more idiomatic as per the nice folks at Reddit.
 // https://www.reddit.com/r/rust/comments/m79rvv/can_i_borrow_some_of_your_time_please/?utm_source=share&utm_medium=web2x&context=3
 
-// TODO: Fix start up condition for 3d stars in the centre of the screen
 // TODO: Fix stars colour based on Z value. More grey, further away
-// TODO: Move base x,y,z to F32 and only convert to integer for output.
 use rand::Rng;
 use raylib::prelude::*;
 use std::fmt;
@@ -14,21 +12,19 @@ pub enum DrawType {
     Circle,
 }
 
-static MIN_SPEED: u32 = 1;
-static MAX_SPEED: u32 = 3;
+static MIN_SPEED: f32 = 1.0;
+static MAX_SPEED: f32 = 3.0;
 static MAX_Z_DISTANCE: i32 = 512;
-static TOO_CLOSE_Z_DISTANCE: i32 = 16;
+static TOO_CLOSE_Z_DISTANCE: f32 = 16.0;
 static SPEED_LAYERS: f32 = 4.0;
 const NUMBER_OF_STARS: usize = 50;
 
-
-
 /// Structure to store star information.
 pub struct AStar {
-    x: i32,
-    y: i32,
-    z: i32,
-    speed: i32,
+    x: f32,
+    y: f32,
+    z: f32,
+    speed: f32,
 }
 impl fmt::Debug for AStar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -46,17 +42,17 @@ impl AStar {
     /// as determined by the range MIN_SPEED/MAX_SPEED constants
     pub fn new(window_width: i32, window_height: i32) -> AStar {
         let mut rng = rand::thread_rng();
-        let local_speed = rng.gen_range(MIN_SPEED..MAX_SPEED) & 0xFFF;
+        let local_speed = (rng.gen_range(MIN_SPEED..MAX_SPEED) as i32) & 0xFFF;
         let signed_speed = -(local_speed as i32);
 
         let half_width = (window_width as f32 / 2.0).trunc() as i32;
         let half_height = (window_height as f32 / 2.0).trunc() as i32;
 
         AStar {
-            x: rng.gen_range(0..window_width) - half_width,
-            y: rng.gen_range(0..window_height) - half_height,
-            z: rng.gen_range(0..MAX_Z_DISTANCE),
-            speed: signed_speed,
+            x: (rng.gen_range(0..window_width) - half_width) as f32,
+            y: (rng.gen_range(0..window_height) - half_height) as f32,
+            z: (rng.gen_range(0..MAX_Z_DISTANCE as i32)) as f32,
+            speed: (signed_speed) as f32,
         }
     }
 
@@ -110,29 +106,29 @@ impl AllStars3d {
         self.draw_type = draw_type;
     }
 
-    pub fn adjust_star_number(&mut self, number_of_stars_to_adjust_by: i32)
-    {
+    pub fn get_number_of_stars(&mut self) -> usize{
+        self.the_stars.len()
+    }
+
+
+    pub fn adjust_star_number(&mut self, number_of_stars_to_adjust_by: i32) {
         let projected_total = self.the_stars.len() as i32 + number_of_stars_to_adjust_by;
 
         // Sanity check
-        if projected_total > 0
-        {
-            if number_of_stars_to_adjust_by < 0 && projected_total < self.the_stars.len() as i32
-            {
+        if projected_total > 0 {
+            if number_of_stars_to_adjust_by < 0 && projected_total < self.the_stars.len() as i32 {
                 // Lose number_of_stars_to_adjust_by from the end
-                let small_index = self.the_stars.len()-number_of_stars_to_adjust_by.abs() as usize;
+                let small_index =
+                    self.the_stars.len() - number_of_stars_to_adjust_by.abs() as usize;
                 let max_index = self.the_stars.len();
                 self.the_stars.drain(small_index..max_index);
-            }
-            else if number_of_stars_to_adjust_by > 0
-            {
+            } else if number_of_stars_to_adjust_by > 0 {
                 self.add_stars(number_of_stars_to_adjust_by as usize);
             }
         }
     }
 
-    fn add_stars(&mut self, number_of_stars: usize)
-    {
+    fn add_stars(&mut self, number_of_stars: usize) {
         let mut star_index: usize = 0;
         while star_index < number_of_stars {
             self.the_stars
@@ -146,19 +142,28 @@ impl AllStars3d {
         self.add_stars(NUMBER_OF_STARS as usize);
     }
 
+    fn get_new_random_x(&mut self) -> f32 {
+        let mut rng = rand::thread_rng();
+        (rng.gen_range(0..self.window_width) - self.centre_x) as f32
+    }
+
+    fn get_new_random_y(&mut self) -> f32 {
+        let mut rng = rand::thread_rng();
+        (rng.gen_range(0..self.window_height) - self.centre_y) as f32
+    }
+
     /// Moves the stars in the vector, as per their current speeds.
     pub fn move_stars(&mut self) -> () {
         let mut rng = rand::thread_rng();
         let mut star_index: usize = 0;
         while star_index < self.the_stars.len() {
-            let mut new_z: i32 =
-                self.the_stars[star_index].z as i32 + self.the_stars[star_index].speed;
+            let mut new_z: f32 = self.the_stars[star_index].z + self.the_stars[star_index].speed;
             if new_z < TOO_CLOSE_Z_DISTANCE {
-                new_z = rng.gen_range(0..MAX_Z_DISTANCE);
-                self.the_stars[star_index].y = rng.gen_range(0..self.window_height) - self.centre_y;
-                self.the_stars[star_index].x = rng.gen_range(0..self.window_width) - self.centre_x;
+                new_z = rng.gen_range(0..MAX_Z_DISTANCE) as f32;
+                self.the_stars[star_index].y = self.get_new_random_y();
+                self.the_stars[star_index].x = self.get_new_random_x();
                 self.the_stars[star_index].speed =
-                    -((rng.gen_range(MIN_SPEED..MAX_SPEED) & 0xFFF) as i32);
+                    -((rng.gen_range(MIN_SPEED..MAX_SPEED) as i32) & 0xFFF) as f32;
             }
             self.the_stars[star_index].z = new_z;
             star_index += 1;
@@ -169,21 +174,23 @@ impl AllStars3d {
     pub fn plot_stars(&mut self, draw_object: &mut RaylibDrawHandle) -> () {
         for a_star in &self.the_stars {
             let (the_colour, layer) = a_star.get_colour_and_layer_from_speed();
-            let plot_x = (((a_star.x as f32 / a_star.z as f32) * 256.0) + self.centre_x as f32)
+            let plot_x = (((a_star.x / a_star.z ) * 256.0) + self.centre_x as f32)
                 .trunc() as i32;
-            let plot_y = (((a_star.y as f32 / a_star.z as f32) * 256.0) + self.centre_y as f32)
+            let plot_y = (((a_star.y / a_star.z ) * 256.0) + self.centre_y as f32)
                 .trunc() as i32;
 
-            match self.draw_type
-            {
-                DrawType::Circle =>
-                    draw_object.draw_circle(plot_x, plot_y, (layer + 1) as f32, the_colour),
+            match self.draw_type {
+                DrawType::Circle => {
+                    draw_object.draw_circle(plot_x, plot_y, (layer + 1) as f32, the_colour)
+                }
 
-                DrawType::Pixel =>
-                    draw_object.draw_pixel(plot_x, plot_y, the_colour),
+                DrawType::Pixel => {
+                    draw_object.draw_pixel(plot_x, plot_y, the_colour)
+                }
 
-                DrawType::Rectangle =>
-                    draw_object.draw_rectangle(plot_x, plot_y, layer + 1, layer + 1, the_colour),
+                DrawType::Rectangle => {
+                    draw_object.draw_rectangle(plot_x, plot_y, layer + 1, layer + 1, the_colour)
+                }
             }
         }
     }
