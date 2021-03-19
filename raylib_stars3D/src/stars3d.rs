@@ -15,12 +15,13 @@ pub enum DrawType {
 static MIN_SPEED: f32 = 1.0;
 static MAX_SPEED: f32 = 3.0;
 static MAX_Z_DISTANCE: i32 = 512;
+static FOCAL_LENGTH: f32 = 128.0;
 static TOO_CLOSE_Z_DISTANCE: f32 = 16.0;
 static SPEED_LAYERS: f32 = 4.0;
 const NUMBER_OF_STARS: usize = 50;
 
 /// Structure to store star information.
-pub struct AStar {
+pub struct AStar3D {
     x: f32,
     y: f32,
     z: f32,
@@ -28,9 +29,9 @@ pub struct AStar {
     colour: Color,
     layer: i32,
 }
-impl fmt::Debug for AStar {
+impl fmt::Debug for AStar3D {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("AStar")
+        f.debug_struct("AStar3D")
             .field("x", &self.x)
             .field("y", &self.y)
             .field("speed", &self.speed)
@@ -38,11 +39,11 @@ impl fmt::Debug for AStar {
     }
 }
 
-impl AStar {
+impl AStar3D {
     /// Create a new Star. Will generate a star with a location
     /// inside window_width and window_height and a speed
     /// as determined by the range MIN_SPEED/MAX_SPEED constants
-    pub fn new(window_width: i32, window_height: i32) -> AStar {
+    pub fn new(window_width: i32, window_height: i32) -> AStar3D {
         let mut rng = rand::thread_rng();
         let local_speed = (rng.gen_range(MIN_SPEED..MAX_SPEED) as i32) & 0xFFF;
         let signed_speed = -(local_speed as i32);
@@ -50,8 +51,8 @@ impl AStar {
         let half_width = (window_width as f32 / 2.0).trunc() as i32;
         let half_height = (window_height as f32 / 2.0).trunc() as i32;
 
-        let (colour, layer) = AStar::get_colour_and_layer_from_speed(local_speed as f32);
-        AStar {
+        let (colour, layer) = AStar3D::get_colour_and_layer_from_speed(local_speed as f32);
+        AStar3D {
             x: (rng.gen_range(0..window_width) - half_width) as f32,
             y: (rng.gen_range(0..window_height) - half_height) as f32,
             z: (rng.gen_range(0..MAX_Z_DISTANCE as i32)) as f32,
@@ -61,11 +62,9 @@ impl AStar {
         }
     }
 
-
     /// Takes the current speed of the star and works out the colour it should be
     /// and also the "speed" layer that it is in.
-    fn  get_colour_and_layer_from_speed(speed_to_test: f32) -> (Color, i32) {
-
+    fn get_colour_and_layer_from_speed(speed_to_test: f32) -> (Color, i32) {
         let speed_values_in_range = (MAX_SPEED - MIN_SPEED) as f32 / SPEED_LAYERS;
 
         let speed_layer = (speed_to_test / speed_values_in_range).trunc();
@@ -85,19 +84,19 @@ impl AStar {
         )
     }
 
-    fn get_colour_and_layer(&self) -> (Color, i32)
-    {
+    fn get_colour_and_layer(&self) -> (Color, i32) {
         (self.colour, self.layer)
     }
 }
 
 pub struct AllStars3d {
-    the_stars: Vec<AStar>,
+    the_stars: Vec<AStar3D>,
     window_width: i32,
     window_height: i32,
     centre_x: i32,
     centre_y: i32,
     draw_type: DrawType,
+    focal_length: f32,
 }
 
 impl AllStars3d {
@@ -109,6 +108,7 @@ impl AllStars3d {
             centre_x: ((window_width as f32 / 2.0) as f32).trunc() as i32,
             centre_y: ((window_height as f32 / 2.0) as f32).trunc() as i32,
             draw_type: DrawType::Rectangle,
+            focal_length: FOCAL_LENGTH,
         }
     }
 
@@ -116,8 +116,25 @@ impl AllStars3d {
         self.draw_type = draw_type;
     }
 
-    pub fn get_number_of_stars(&mut self) -> usize{
+    pub fn get_number_of_stars(&mut self) -> usize {
         self.the_stars.len()
+    }
+
+    pub fn get_focal_length(&mut self) -> f32 {
+        self.focal_length
+    }
+
+    pub fn increase_focal_length(&mut self) {
+        let adjusted_focal_length = (self.focal_length as i32) << 1;
+        self.focal_length = adjusted_focal_length as f32;
+    }
+
+    pub fn decrease_focal_length(&mut self) {
+        let adjusted_focal_length = (self.focal_length as i32) >> 1;
+        if adjusted_focal_length > 0
+        {
+            self.focal_length = adjusted_focal_length as f32;
+        }
     }
 
 
@@ -142,24 +159,28 @@ impl AllStars3d {
         let mut star_index: usize = 0;
         while star_index < number_of_stars {
             self.the_stars
-                .push(AStar::new(self.window_width, self.window_height));
+                .push(AStar3D::new(self.window_width, self.window_height));
             star_index += 1;
         }
     }
 
-    /// Populates a vector with a collection of AStar objects
+    /// Populates a vector with a collection of AStar3D objects
     pub fn populate_stars(&mut self) -> () {
         self.add_stars(NUMBER_OF_STARS as usize);
     }
 
     fn get_new_random_x(&mut self) -> f32 {
         let mut rng = rand::thread_rng();
-        (rng.gen_range(0..self.window_width) - self.centre_x) as f32
+        let new_x = (rng.gen_range(0..self.window_width) - self.centre_x) as f32;
+        assert!(new_x >= -(self.centre_x as f32));
+        return new_x;
     }
 
     fn get_new_random_y(&mut self) -> f32 {
         let mut rng = rand::thread_rng();
-        (rng.gen_range(0..self.window_height) - self.centre_y) as f32
+        let new_y = (rng.gen_range(0..self.window_height) - self.centre_y) as f32;
+        assert!(new_y >= -(self.centre_y as f32));
+        return new_y;
     }
 
     /// Moves the stars in the vector, as per their current speeds.
@@ -184,19 +205,25 @@ impl AllStars3d {
     pub fn plot_stars(&mut self, draw_object: &mut RaylibDrawHandle) -> () {
         for a_star in &self.the_stars {
             let (the_colour, layer) = a_star.get_colour_and_layer();
-            let plot_x = (((a_star.x / a_star.z ) * 256.0) + self.centre_x as f32)
-                .trunc() as i32;
-            let plot_y = (((a_star.y / a_star.z ) * 256.0) + self.centre_y as f32)
-                .trunc() as i32;
+            let plot_x =
+                (((a_star.x / a_star.z) * self.focal_length) + self.centre_x as f32).trunc() as i32;
+            let plot_y =
+                (((a_star.y / a_star.z) * self.focal_length) + self.centre_y as f32).trunc() as i32;
+
+            // Sanity plot checks
+            if plot_x < 0 || plot_x > self.window_width {
+                continue;
+            }
+            if plot_y < 0 || plot_y > self.window_height {
+                continue;
+            }
 
             match self.draw_type {
                 DrawType::Circle => {
                     draw_object.draw_circle(plot_x, plot_y, (layer + 1) as f32, the_colour)
                 }
 
-                DrawType::Pixel => {
-                    draw_object.draw_pixel(plot_x, plot_y, the_colour)
-                }
+                DrawType::Pixel => draw_object.draw_pixel(plot_x, plot_y, the_colour),
 
                 DrawType::Rectangle => {
                     draw_object.draw_rectangle(plot_x, plot_y, layer + 1, layer + 1, the_colour)
