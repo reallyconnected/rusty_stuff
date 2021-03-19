@@ -19,7 +19,7 @@ static MAX_SPEED: u32 = 3;
 static MAX_Z_DISTANCE: i32 = 512;
 static TOO_CLOSE_Z_DISTANCE: i32 = 16;
 static SPEED_LAYERS: f32 = 4.0;
-const NUMBER_OF_STARS: usize = 5000;
+const NUMBER_OF_STARS: usize = 50;
 
 
 
@@ -110,21 +110,47 @@ impl AllStars3d {
         self.draw_type = draw_type;
     }
 
-    /// Populates a vector with a collection of AStar objects
-    pub fn populate_star(&mut self) -> () {
+    pub fn adjust_star_number(&mut self, number_of_stars_to_adjust_by: i32)
+    {
+        let projected_total = self.the_stars.len() as i32 + number_of_stars_to_adjust_by;
+
+        // Sanity check
+        if projected_total > 0
+        {
+            if number_of_stars_to_adjust_by < 0 && projected_total < self.the_stars.len() as i32
+            {
+                // Lose number_of_stars_to_adjust_by from the end
+                let small_index = self.the_stars.len()-number_of_stars_to_adjust_by.abs() as usize;
+                let max_index = self.the_stars.len();
+                self.the_stars.drain(small_index..max_index);
+            }
+            else if number_of_stars_to_adjust_by > 0
+            {
+                self.add_stars(number_of_stars_to_adjust_by as usize);
+            }
+        }
+    }
+
+    fn add_stars(&mut self, number_of_stars: usize)
+    {
         let mut star_index: usize = 0;
-        while star_index < NUMBER_OF_STARS {
+        while star_index < number_of_stars {
             self.the_stars
                 .push(AStar::new(self.window_width, self.window_height));
             star_index += 1;
         }
     }
 
+    /// Populates a vector with a collection of AStar objects
+    pub fn populate_stars(&mut self) -> () {
+        self.add_stars(NUMBER_OF_STARS as usize);
+    }
+
     /// Moves the stars in the vector, as per their current speeds.
     pub fn move_stars(&mut self) -> () {
         let mut rng = rand::thread_rng();
         let mut star_index: usize = 0;
-        while star_index < NUMBER_OF_STARS {
+        while star_index < self.the_stars.len() {
             let mut new_z: i32 =
                 self.the_stars[star_index].z as i32 + self.the_stars[star_index].speed;
             if new_z < TOO_CLOSE_Z_DISTANCE {

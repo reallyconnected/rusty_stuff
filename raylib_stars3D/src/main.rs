@@ -27,16 +27,29 @@ fn handle_key(rl: &mut RaylibHandle, all_stars: &mut stars3d::AllStars3d)
         all_stars.set_draw_type(stars3d::DrawType::Rectangle);
     }
 
+    if rl.is_key_pressed(KEY_PAGE_UP)
+    {
+        all_stars.adjust_star_number(100);
+    }
+
+    if rl.is_key_pressed(KEY_PAGE_DOWN)
+    {
+        all_stars.adjust_star_number(-100);
+    }
+
+
     if rl.is_key_down(KEY_LEFT_ALT) && rl.is_key_pressed(KEY_ENTER) {
         rl.toggle_fullscreen();
     }
+
+
 
 }
 
 fn main() {
     let mut all_stars = stars3d::AllStars3d::new(WINDOW_WIDTH, WINDOW_HEIGHT);
     all_stars.set_window_size(WINDOW_WIDTH, WINDOW_HEIGHT);
-    all_stars.populate_star();
+    all_stars.populate_stars();
 
     let mut init_function = raylib::init();
 
