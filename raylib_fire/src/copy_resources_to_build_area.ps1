@@ -1,0 +1,1 @@
+xcopy resources ..\target\debug\
