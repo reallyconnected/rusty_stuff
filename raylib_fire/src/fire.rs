@@ -1,6 +1,5 @@
 use rand::Rng;
 use raylib::prelude::*;
-use std::fmt;
 
 pub static FIRE_GRID_WIDTH: usize = 1280 / 8;
 pub static FIRE_GRID_HEIGHT: usize = 480 / 8;
@@ -46,10 +45,6 @@ impl FireManager {
         }
     }
 
-    pub fn get_palette_clone(&self) -> Vec<Color> {
-        self.palette.clone()
-    }
-
     pub fn finalise_palette(&mut self) {
         self.palette.sort_unstable_by(|a, b| (compare_color(a, b)));
         self.palette.dedup();
@@ -59,10 +54,6 @@ impl FireManager {
     pub fn add_palette_colour(&mut self, colour_to_add: Color) {
         self.palette.push(colour_to_add);
         self.max_palette_index = self.palette.len();
-    }
-
-    pub fn get_palette_colour(&mut self, colour_index: usize) -> Color {
-        return self.palette[colour_index as usize];
     }
 
     pub fn number_of_palette_colours(&mut self) -> usize {
@@ -95,13 +86,9 @@ impl FireManager {
         let lower_pallet_index = 0 + self.palette.len() / 5 as usize;
         let upper_pallet_index = self.palette.len() - 1 as usize;
 
-        for current_x in (0..self.grid_width-1).step_by(rng.gen_range(1..self.grid_width/2)) {
-            self.set_fire_value(current_x, self.grid_height - 2,  rng.gen_range(
-                            lower_pallet_index..
-                            upper_pallet_index));
-            self.set_fire_value(current_x, self.grid_height - 1,  rng.gen_range(
-                                lower_pallet_index..
-                                upper_pallet_index));
+        for current_x in (0..self.grid_width - 1).step_by(rng.gen_range(1..self.grid_width / 2)) {
+            self.set_fire_value(current_x, self.grid_height - 2, rng.gen_range(lower_pallet_index..upper_pallet_index));
+            self.set_fire_value(current_x, self.grid_height - 1, rng.gen_range(lower_pallet_index..upper_pallet_index));
         }
     }
 
@@ -114,13 +101,11 @@ impl FireManager {
     }
 
     pub fn animate(&mut self) {
-        let mut rng = rand::thread_rng();
         let mut current_offset = (self.grid_width + 1) as usize;
 
         for doing_line in 1..self.grid_height - 1 {
             let mut average_adjust = 1;
-            if doing_line < (self.grid_height - (self.grid_height / 2))
-            {
+            if doing_line < (self.grid_height - (self.grid_height / 2)) {
                 average_adjust = 3;
             }
             for _ in 0..self.grid_width - 2 {

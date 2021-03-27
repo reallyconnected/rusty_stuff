@@ -1,5 +1,4 @@
 // use this URL: https://www.raylib.com/cheatsheet/cheatsheet.html
-use rand::prelude::*;
 use raylib::consts::KeyboardKey::*;
 use raylib::prelude::*;
 mod fire;
@@ -54,15 +53,13 @@ fn handle_key(rl: &mut RaylibHandle, state: &mut StateStore) {
     }
 
     if rl.is_key_pressed(KEY_RIGHT_BRACKET) {
-        if state.rectangle_border + 1 < ((state.rectangle_width / 2) -1)
-        {
+        if state.rectangle_border + 1 < ((state.rectangle_width / 2) - 1) {
             state.rectangle_border += 1;
         }
     }
 
     if rl.is_key_pressed(KEY_LEFT_BRACKET) {
-        if state.rectangle_border > 0
-        {
+        if state.rectangle_border > 0 {
             state.rectangle_border -= 1;
         }
     }
@@ -110,7 +107,6 @@ fn main() {
     let mut frame_counter = 0;
 
     while !rl.window_should_close() {
-
         frame_counter += 1;
 
         handle_key(&mut rl, &mut state);
@@ -129,10 +125,8 @@ fn main() {
         let screen_width = d.get_screen_width();
         let screen_height = d.get_screen_height();
 
-
-
         state.rectangle_width = screen_width / fire_manager.grid_width_as_i32();
-        state.rectangle_height= screen_height / fire_manager.grid_height_as_i32();
+        state.rectangle_height = screen_height / fire_manager.grid_height_as_i32();
 
         let rectangles_in_a_row = (screen_width / state.rectangle_width) as usize;
         let rectangle_row_max = (screen_height / state.rectangle_height) as usize;
