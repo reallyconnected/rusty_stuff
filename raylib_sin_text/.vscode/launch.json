@@ -1,0 +1,46 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "preLaunchTask": "copyfire",
+            "name": "Debug executable 'raylib_sin_text'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=raylib_sin_text",
+                    "--package=raylib_sin_text"
+                ],
+                "filter": {
+                    "name": "raylib_sin_text",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'raylib_sin_text'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=raylib_sin_text",
+                    "--package=raylib_sin_text"
+                ],
+                "filter": {
+                    "name": "raylib_sin_text",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

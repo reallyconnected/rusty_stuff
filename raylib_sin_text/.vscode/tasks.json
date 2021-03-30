@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "copyfire",
+            "type":"shell",
+            "command": "cd",
+            // "args": ["resources","target\\debug",]
+        }
+    ]
+}
