@@ -33,12 +33,17 @@ fn main() {
     rl.set_target_fps(TARGET_FPS);
 
     let mut frame_counter = 0;
+    let mut vec_font_images: Vec<Image> = Vec::new();
 
-    let text_to_write: &'static str ="Bounce";
-    let font_stuff = Image::image_text(&text_to_write, 36 as i32, Color::new(255,255,255,255));
-    println!("Image info: {:?}", font_stuff);
-
-
+    let font_string: & str = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    let mut vec_font_images = Vec::new();
+    let mut max_width: i32 = 0;
+    let mut max_height: i32 = 0;
+    for a_character in font_string.chars()
+    {
+        let current_character_image = Image::image_text(&a_character.to_string(), 36 as i32, Color::new(255,255,255,255)).unwrap();
+        vec_font_images.push(current_character_image);
+    }
 
 
     while !rl.window_should_close() {
