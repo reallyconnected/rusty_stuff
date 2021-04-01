@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'create_font_sheet'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=create_font_sheet",
+                    "--package=create_font_sheet"
+                ],
+                "filter": {
+                    "name": "create_font_sheet",
+                    "kind": "bin"
+                }
+            },
+            "args": ["-o", "newtegomin", "-f", "c:\\windows\\fonts\\NewTegomin-Regular.ttf"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'create_font_sheet'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=create_font_sheet",
+                    "--package=create_font_sheet"
+                ],
+                "filter": {
+                    "name": "create_font_sheet",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
