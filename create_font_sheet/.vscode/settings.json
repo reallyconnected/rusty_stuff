@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "argparse",
         "consts",
         "dedup",
         "finalise",
@@ -7,6 +8,13 @@
         "msaa",
         "palette",
         "raylib",
+        "rusttype",
         "trunc"
+    ],
+    "cSpell.ignoreWords": [
+        "abcdefghijklmnopqrstuvwxyz",
+        "imageproc",
+        "rgba",
+        "tegomin"
     ]
 }
