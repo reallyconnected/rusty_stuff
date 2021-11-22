@@ -1,3 +1,14 @@
+/*
+Command line utility to build a png file.
+
+create_font_sheet.exe -f "c:\Windows\Fonts\arial.ttf" -o fish.png
+
+Would create fish.png an fish.yml.
+
+Fish.yml has the full list of glyphs and where to find them.
+
+*/
+
 extern crate argparse;
 extern crate rusttype;
 
@@ -110,6 +121,8 @@ fn main() {
         meta_data_yml.push_str(&format!("    min_y: {}\n", value.min.y));
         meta_data_yml.push_str(&format!("    max_x: {}\n", value.max.x));
         meta_data_yml.push_str(&format!("    max_y: {}\n", value.max.y));
+        meta_data_yml.push_str(&format!("    width: {}\n",  value.max.x - value.min.x));
+        meta_data_yml.push_str(&format!("    height: {}\n", value.max.y - value.min.y));
         meta_data_yml.push_str("\n");
     }
 
