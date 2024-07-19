@@ -73,8 +73,8 @@ fn main() {
     let mut fire_manager = fire::FireManager::new(fire::FIRE_GRID_WIDTH, fire::FIRE_GRID_HEIGHT);
     let mut state: StateStore = StateStore::new(DrawType::Rectangle, RECTANGLE_GRID_WIDTH);
 
-    let mut load_image_result = Image::load_image(r"C:\Duncan\source\rust\rusty_stuff\raylib_fire\target\debug\white_yellow_orange_black_black_512.png");
-    let image_data = load_image_result.as_mut().unwrap();
+    let load_image_result = Image::load_image(r"C:\Duncan\source\rust\rusty_stuff\raylib_fire\target\debug\white_yellow_orange_black_black_512.png");
+    let image_data = load_image_result.unwrap();
     let the_palette = image_data.extract_palette(image_data.width as u32);
 
     let mut colour_index = 0;
