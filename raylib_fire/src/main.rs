@@ -1,4 +1,6 @@
 // use this URL: https://www.raylib.com/cheatsheet/cheatsheet.html
+use std::env;
+use std::path::PathBuf;
 use raylib::consts::KeyboardKey::*;
 use raylib::prelude::*;
 mod fire;
@@ -65,15 +67,19 @@ fn handle_key(rl: &mut RaylibHandle, state: &mut StateStore) {
     }
 }
 
-fn print_type_of<T>(_: &T) {
-    println!("Type :{}", std::any::type_name::<T>());
-}
-
 fn main() {
     let mut fire_manager = fire::FireManager::new(fire::FIRE_GRID_WIDTH, fire::FIRE_GRID_HEIGHT);
     let mut state: StateStore = StateStore::new(DrawType::Rectangle, RECTANGLE_GRID_WIDTH);
 
-    let load_image_result = Image::load_image(r"C:\Duncan\source\rust\rusty_stuff\raylib_fire\target\debug\white_yellow_orange_black_black_512.png");
+    let exe_path = env::current_exe().expect("Failed to read exe path...");
+
+    let mut file_path: PathBuf = exe_path.parent().unwrap().to_path_buf();
+    file_path.push("white_yellow_orange_black_black_512.png");
+
+    let file_path_str = file_path.to_str().expect("Could not convert file path to string.");
+    println!("Using Resource: {} ", file_path_str);
+
+    let load_image_result = Image::load_image(file_path_str); // Just put this image beside the exe you created
     let image_data = load_image_result.unwrap();
     let the_palette = image_data.extract_palette(image_data.width as u32);
 
