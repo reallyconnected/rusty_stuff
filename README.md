@@ -17,6 +17,7 @@ Released a working version of chunky fire. Rough, it could be said. Very slow to
 
 ### Running it.
 See the *General Run Instructions* section, below.
+Copy the png files in `raylib_fire\src\resources` to the location of your exe.
 The main directory is `raylib_fire` and the source code is contained in `main.rs` and `fire.rs`.
 
 ## 2021_03_19 - Stars3D
